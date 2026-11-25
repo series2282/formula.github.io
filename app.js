@@ -100,8 +100,8 @@
     if(s.mode==='quiz')body=`<div class="answer-grid" role="group" aria-label="Варианты ответа">${answerOptions}</div>`;
     else body=`<div id="assembly-root">${renderAssembly()}</div>`;
     let feedback='';
-    if(s.answered){const correct=s.feedback.correct;feedback=`<div class="feedback ${correct?'':'is-wrong'}" role="status"><h3>${icon(correct?'check':'repeat')}${correct?'Всё верно!':'Ничего страшного — теперь запомнится'}</h3>${!correct?`<span class="formula correct-formula">${esc(f.answer)}</span>`:''}<p>${esc(f.description)}</p>${!correct?'<div class="repetition-info">Вернёмся к этой формуле в следующих вопросах или тренировках.</div>':''}</div>`;}
-    $('#game-container').innerHTML=`<div class="session-wrap"><div class="session-top"><span class="session-label">${icon(s.onlyIds?'repeat':'spark')}${s.onlyIds?'Работа над ошибками':subjectNames[s.subject]} <span class="dot-separator">·</span> ${modeNames[s.mode]}</span><span class="session-count">${Math.min(complete+(s.answered?0:1),s.total)} / ${s.total}</span><button id="quit-session" class="quit-button">Выйти ${icon('close')}</button></div><progress class="session-progress" value="${complete}" max="${s.total}" aria-label="Прогресс тренировки">${complete} из ${s.total}</progress><section class="panel question-card"><div class="question-meta"><span>${subjectNames[f.subject]}</span><span class="topic-badge">${esc(f.topic)}</span><span>${f.grade} класс</span>${s.isRepeat?`<span class="repeat-tag">${icon('repeat')}Закрепляем</span>`:''}</div><h2 id="question-title" tabindex="-1">${esc(f.prompt)}</h2><p class="question-description">${s.mode==='quiz'?'Выбери одну верную формулу. Не торопись — таймера нет.':'Собери формулу целиком, слева направо, как в справочнике. Перетащи символы в ячейки; в наборе есть лишние.'}</p>${s.showHint?`<div class="hint-text">${icon('info')} ${esc(f.hint)}</div>`:''}${body}${feedback}<div class="question-footer">${!s.answered&&!s.showHint?`<button id="show-hint" class="hint-button">${icon('info')}Небольшая подсказка</button>`:`<span class="keyboard-hint">${s.answered?'<kbd>Enter</kbd> — продолжить':'Подсказка не влияет на оценку'}</span>`}${s.answered?`<button id="next-question" class="button button-primary">${complete>=s.total?'К результатам':'Следующий вопрос'}${icon('arrow')}</button>`:`<span class="keyboard-hint">${s.mode==='quiz'?'<kbd>1</kbd>–<kbd>4</kbd> — выбрать ответ':'<kbd>Tab</kbd> + <kbd>Enter</kbd> — расставить символы'}</span>`}</div></section><p class="result-notice" style="margin-top:18px">Прогресс сохраняется после каждого ответа.</p></div>`;
+    if(s.answered){const correct=s.feedback.correct;feedback=`<div class="feedback ${correct?'':'is-wrong'}" role="status"><h3>${icon(s.feedback.revealed?'book':correct?'check':'repeat')}${s.feedback.revealed?'Ответ открыт':correct?'Всё верно!':'Ничего страшного — теперь запомнится'}</h3>${!correct?`<span class="formula correct-formula">${esc(f.answer)}</span>`:''}<p>${esc(f.description)}</p>${!correct?`<div class="repetition-info">${s.feedback.revealed?'Этот ответ не засчитан как самостоятельный. Формула пойдёт на повторение.':'Вернёмся к этой формуле в следующих вопросах или тренировках.'}</div>`:''}</div>`;}
+    $('#game-container').innerHTML=`<div class="session-wrap"><div class="session-top"><span class="session-label">${icon(s.onlyIds?'repeat':'spark')}${s.onlyIds?'Работа над ошибками':subjectNames[s.subject]} <span class="dot-separator">·</span> ${modeNames[s.mode]}</span><span class="session-count">${Math.min(complete+(s.answered?0:1),s.total)} / ${s.total}</span><button id="quit-session" class="quit-button">Выйти ${icon('close')}</button></div><progress class="session-progress" value="${complete}" max="${s.total}" aria-label="Прогресс тренировки">${complete} из ${s.total}</progress><section class="panel question-card"><div class="question-meta"><span>${subjectNames[f.subject]}</span><span class="topic-badge">${esc(f.topic)}</span><span>${f.grade} класс</span>${s.isRepeat?`<span class="repeat-tag">${icon('repeat')}Закрепляем</span>`:''}</div><h2 id="question-title" tabindex="-1">${esc(f.prompt)}</h2><p class="question-description">${s.mode==='quiz'?'Выбери одну верную формулу. Не торопись — таймера нет.':'Собери формулу целиком, слева направо, как в справочнике. Перетащи символы в ячейки; в наборе есть лишние.'}</p>${!s.answered?`<div class="reveal-answer-control"><button type="button" id="show-answer" class="button button-reveal" aria-describedby="show-answer-note">${icon('book')}Показать ответ</button><span id="show-answer-note">Не помнишь? Открой формулу и объяснение. Вопрос пойдёт на повторение.</span></div>`:''}${s.showHint?`<div class="hint-text">${icon('info')} ${esc(f.hint)}</div>`:''}${body}${feedback}<div class="question-footer">${!s.answered&&!s.showHint?`<button id="show-hint" class="hint-button">${icon('info')}Небольшая подсказка</button>`:`<span class="keyboard-hint">${s.answered?'<kbd>Enter</kbd> — продолжить':'Подсказка не влияет на оценку'}</span>`}${s.answered?`<button id="next-question" class="button button-primary">${complete>=s.total?'К результатам':'Следующий вопрос'}${icon('arrow')}</button>`:`<span class="keyboard-hint">${s.mode==='quiz'?'<kbd>1</kbd>–<kbd>4</kbd> — выбрать ответ':'<kbd>Tab</kbd> — выбрать кнопку, <kbd>Enter</kbd> — нажать'}</span>`}</div></section><p class="result-notice" style="margin-top:18px">Прогресс сохраняется после каждого ответа.</p></div>`;
   }
   function renderAssembly(){
     const s=session,a=s.assembly,used=new Set(a.slots.filter(tile=>tile!==null));
@@ -134,7 +134,7 @@
     const tile=event.target.closest('.assembly-bank [data-assembly-tile]');
     if(tile&&!tile.disabled){
       const target=a.slots[a.activeSlot]===null?a.activeSlot:a.slots.indexOf(null);
-      if(target>=0){C.moveAssemblyTile(a,Number(tile.dataset.assemblyTile),target);updateAssembly(`[data-assembly-slot="${a.activeSlot}"]`);}
+      if(target>=0){C.moveAssemblyTile(a,Number(tile.dataset.assemblyTile),target);updateAssembly(C.assemblyComplete(a)?'#check-assembly':`[data-assembly-slot="${a.activeSlot}"]`);}
       return true;
     }
     if(event.target.closest('#clear-assembly')){a.slots.fill(null);a.activeSlot=0;updateAssembly('[data-assembly-slot="0"]');return true;}
@@ -196,12 +196,19 @@
   document.addEventListener('pointercancel',clearDrag);
   window.addEventListener('blur',clearDrag);
   document.addEventListener('click',event=>{if(suppressAssemblyClick){event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
-  function submitAnswer(correct,selected=null){
+  function showAnswer(){
     if(!session||session.answered)return;
-    if(session.mode==='build'&&!C.assemblyComplete(session.assembly))return;
-    session.answered=true;session.feedback={correct,selected};
+    clearDrag();
+    const selected=session.mode==='build'?C.assemblyAnswer(session.assembly):null;
+    submitAnswer(false,selected,true);
+    $('.feedback')?.scrollIntoView({block:'nearest',behavior:'instant'});
+  }
+  function submitAnswer(correct,selected=null,revealed=false){
+    if(!session||session.answered)return;
+    if(session.mode==='build'&&!revealed&&!C.assemblyComplete(session.assembly))return;
+    session.answered=true;session.feedback={correct,selected,revealed};
     const id=session.current.id;
-    session.answers.push({id,correct,selected,hinted:session.showHint});
+    session.answers.push({id,correct,selected,hinted:session.showHint,revealed});
     C.recordAnswer(progress,id,correct);
     session.retryQueue=session.retryQueue.filter(item=>item.id!==id);
     if(!correct)session.retryQueue.push({id,due:session.answers.length+2});
@@ -253,6 +260,7 @@
     if(link&&['#training','#library','#stats'].includes(link.getAttribute('href'))){event.preventDefault();await navigate(link.getAttribute('href').slice(1));return;}
     const answer=event.target.closest('[data-answer]');
     if(answer&&session&&!session.answered){const selected=session.choices[Number(answer.dataset.answer)];submitAnswer(selected===session.current.answer,selected);return;}
+    if(event.target.closest('#show-answer')){showAnswer();return;}
     if(assemblyClick(event))return;
     if(event.target.closest('#next-question')){nextQuestion();return;}
     if(event.target.closest('#show-hint')&&session){session.showHint=true;renderQuestion();return;}

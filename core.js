@@ -24,7 +24,7 @@
         result.days[key] = {answers,correct:Math.min(integer(value.correct),answers)};
       }
     }
-    result.sessions = Array.isArray(raw.sessions) ? raw.sessions.filter(s => s && typeof s.id === 'string' && ['math','physics','all'].includes(s.subject) && ['quiz','cards'].includes(s.mode) && [5,10,20].includes(s.total) && Number.isSafeInteger(s.correct) && s.correct >= 0 && s.correct <= s.total && Number.isSafeInteger(s.endedAt) && s.endedAt > 0 && Number.isFinite(s.duration) && s.duration >= 0).slice(-100) : [];
+    result.sessions = Array.isArray(raw.sessions) ? raw.sessions.filter(s => s && typeof s.id === 'string' && ['math','physics','all'].includes(s.subject) && ['quiz','build','cards'].includes(s.mode) && [5,10,20].includes(s.total) && Number.isSafeInteger(s.correct) && s.correct >= 0 && s.correct <= s.total && Number.isSafeInteger(s.endedAt) && s.endedAt > 0 && Number.isFinite(s.duration) && s.duration >= 0).slice(-100) : [];
     result.currentStreak = integer(raw.currentStreak);
     result.bestStreak = Math.max(integer(raw.bestStreak), result.currentStreak);
     return result;
@@ -77,6 +77,33 @@
     for(let i=result.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[result[i],result[j]]=[result[j],result[i]];}
     return result;
   }
+  // Буквы, знаки и степени — отдельные плитки; названия функций неделимы.
+  const tokenizeFormula = formula => String(formula).match(/log|sin|cos|tg|[^\s]/gu) || [];
+  function createAssembly(formula,rng=Math.random) {
+    const tokens=tokenizeFormula(formula.answer);
+    const extraPool=[...new Set([
+      ...formula.wrong.flatMap(tokenizeFormula),
+      '+','−','×','/','=','²','³','√','π','ρ','λ','μ','ν','Δ','0','1','2','3','4','a','b','c','x','y','m','v','t','(',')'
+    ])].filter(token=>!tokens.includes(token));
+    const extras=shuffle(extraPool,rng).slice(0,Math.max(4,Math.min(7,Math.ceil(tokens.length/3))));
+    return {tokens,tiles:shuffle([...tokens,...extras],rng),slots:tokens.map(()=>null),activeSlot:0};
+  }
+  function moveAssemblyTile(assembly,tile,target) {
+    if(!Number.isInteger(tile)||tile<0||tile>=assembly.tiles.length)return false;
+    if(target!==null&&(!Number.isInteger(target)||target<0||target>=assembly.slots.length))return false;
+    const source=assembly.slots.indexOf(tile);
+    if(source===target)return false;
+    if(target===null){if(source<0)return false;assembly.slots[source]=null;assembly.activeSlot=source;return true;}
+    const displaced=assembly.slots[target];
+    if(source>=0)assembly.slots[source]=displaced;
+    assembly.slots[target]=tile;
+    const next=assembly.slots.findIndex((value,index)=>index>target&&value===null);
+    assembly.activeSlot=next>=0?next:Math.max(0,assembly.slots.indexOf(null));
+    return true;
+  }
+  const assemblyComplete = assembly => assembly.slots.every(tile=>tile!==null);
+  const assemblyCorrect = assembly => assemblyComplete(assembly)&&assembly.slots.every((tile,index)=>assembly.tiles[tile]===assembly.tokens[index]);
+  const assemblyAnswer = assembly => assembly.slots.map(tile=>tile===null?'□':assembly.tiles[tile]).join('');
   function totals(progress,data) {
     let attempts=0,correct=0,mastered=0;
     for(const f of data){const s=getStat(progress,f.id);attempts+=s.attempts;correct+=s.correct;if(isMastered(s))mastered++;}
@@ -89,5 +116,5 @@
     while(progress.days[dateKey(date)]?.answers){count++;date.setDate(date.getDate()-1);}
     return count;
   }
-  root.FormulaCore=Object.freeze({dateKey,emptyStat,createProgress,getStat,isMastered,isWeak,sanitizeProgress,recordAnswer,weight,chooseFormula,shuffle,totals,dayStreak});
+  root.FormulaCore=Object.freeze({dateKey,emptyStat,createProgress,getStat,isMastered,isWeak,sanitizeProgress,recordAnswer,weight,chooseFormula,shuffle,tokenizeFormula,createAssembly,moveAssemblyTile,assemblyComplete,assemblyCorrect,assemblyAnswer,totals,dayStreak});
 })(typeof window !== 'undefined' ? window : globalThis);
